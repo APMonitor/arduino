@@ -1,0 +1,14 @@
+Constants
+  TdegF_ss = 80
+  Vin_ss = 0
+
+Parameters
+  K = 0.25
+  tau = 240
+  Vin = 0
+  
+Variables
+  TdegF = 80
+  
+Equations
+  tau * $TdegF = -(TdegF-TdegF_ss) + K * (Vin - Vin_ss)

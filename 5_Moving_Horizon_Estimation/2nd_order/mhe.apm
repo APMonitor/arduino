@@ -1,0 +1,20 @@
+Constants
+  Vin_ss = 0
+
+Parameters
+  TK_ss = 300
+  Kp = 0.359806899452
+  tau = 47.7311112863
+  zeta = 1.56206738412
+  Vin = Vin_ss
+  
+Variables
+  TK = TK_ss
+  x1 = 0
+  x2 = 0
+  
+Equations
+  x2 = $x1
+  tau^2 * $x2 + 2 *zeta*tau*$x1 + x1 = Kp * (Vin-Vin_ss) 
+  TK = x1 + TK_ss
+  

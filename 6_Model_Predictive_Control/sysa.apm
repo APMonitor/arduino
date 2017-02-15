@@ -1,0 +1,53 @@
+Objects
+ sysa = arx
+End Objects
+
+Connections
+  u = sysa.u
+  y = sysa.y
+End Connections
+
+Model 
+  Constants
+    TK_ss = 300
+    Vin_ss = 0
+  End Constants
+
+  Parameters 
+    Vin = Vin_ss
+  End Parameters 
+
+  Variables 
+    u = 0
+    y = 0
+    TK = TK_ss
+  End Variables 
+
+  Equations 
+    TK = y + TK_ss
+    Vin = u + Vin_ss
+  End Equations 
+End Model 
+
+File sysa.txt
+  1      ! m=number of inputs
+  1      ! p=number of outputs
+  1      ! nu=number of input terms
+  2      ! ny=number of output terms
+End File
+
+! Alpha matrix (ny x p)
+File sysa.alpha.txt 
+  1.931090e+00 
+  -9.315460e-01 
+End File 
+
+! Beta matrix (p x (nu x m))
+File sysa.beta.txt 
+  1.662000e-04 
+End File 
+
+! Gamma vector (p x 1)
+File sysa.gamma.txt 
+0.000000e+00 
+End File 
