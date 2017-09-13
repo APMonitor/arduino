@@ -8,7 +8,7 @@
 
 # Process Control Temperature Lab
 
-The [BYU Arduino Temperature Control Lab](http://apmonitor.com/pdc/index.php/Main/ArduinoTemperatureControl) is designed as a modular, portable, and inexpensive solution for hands-on process control learning.  Heat output is adjusted by modulating the voltage to a transistor. A thermistor measures the temperature. Energy from the transistor output is transferred by conduction and convection to the temperature sensor.  The lab is integrated into a small PCB shield which can be mounted to any [Arduino](https://www.arduino.cc/) or Arduino compatible microcontroller and programmatically controlled using Python over a USB connection.  
+The [BYU Arduino Temperature Control Lab](http://apmonitor.com/pdc/index.php/Main/ArduinoTemperatureControl) is designed as a modular, portable, and inexpensive solution for hands-on process control learning.  Heat output is adjusted by modulating the voltage to a transistor. A thermistor measures the temperature. Energy from the transistor output is transferred by conduction and convection to the temperature sensor.  The lab is integrated into a small PCB shield which can be mounted to any [Arduino](https://www.arduino.cc/) or Arduino compatible microcontroller. Experiments can then be programmatically controlled using Python over a USB connection.  
 
 ## Key Features
 This lab reinforces principles of system dynamics, 
