@@ -2,7 +2,7 @@
 <img src="./images/banner.png">
 </p>
 
-<p style="text-align: center;">
+<p align="center">
 <b>A modular, portable lab for learning <a href="http://apmonitor.com/pdc/index.php">Process Control</a></b>
 </p>
 
