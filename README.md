@@ -25,7 +25,7 @@ estimation, and model predictive control, including:
 
 ## Getting Started
 
-For instructions on configuring your system and getting started with the lab see [Getting Started][gettingStarted.md].
+For instructions on configuring your system and getting started with the lab see [Getting Started](./gettingStarted.md).
 
 ## Course Modules
 
