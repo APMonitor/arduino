@@ -42,9 +42,23 @@ class Arduino(object):
         print('Write voltage on digital pin '+ str(self.voltOutPin))
         
     def findPort(self):
+        found = False
         for port in list(serial.tools.list_ports.comports()):
+            # Arduino Uno
             if port[2].startswith('USB VID:PID=16D0:0613'):
                 port = port[0]
+                found = True
+            # HDuino
+            if port[2].startswith('USB VID:PID=1A86:7523'):
+                port = port[0]
+                found = True                
+        if (not found):
+            print('Arduino COM port not found')
+            print('Please ensure that the USB cable is connected')
+            print('--- Printing Serial Ports ---')            
+            for port in list(serial.tools.list_ports.comports()):
+                print(port[0] + ' ' + port[1] + ' ' + port[2])
+            port = 'COM3'
         return port
         
     def initPlots(self):
