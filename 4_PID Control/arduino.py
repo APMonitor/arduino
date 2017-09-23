@@ -116,6 +116,16 @@ class Arduino(object):
         voltage = float(val) * (3300.0/1024.0)
         degC = (voltage - 500.0)/10.0
         degK = degC + 273.15
+        # LED Temperature indicator
+        pin = 9 # for LED
+        led_level = int(2.0 * (degK - 300.0))
+        led_level = min(max(0,led_level),250) # clip
+        cmd_str = self.build_cmd_str("aw", (pin, led_level))
+        try:
+            self.sr.write(cmd_str.encode())
+            self.sr.flush()
+        except:
+            pass        
         return degK
         
     def writeVoltage(self,mV):
