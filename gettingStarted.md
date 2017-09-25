@@ -27,12 +27,12 @@ Follow these steps to set up your Temperature Control Lab:
 
     *If you are using Windows 10, the Arduino board should connect without additional drivers required.*  
 
-    If you are using a different version of Windows, see the [driver installation instructions][WindowsDriver/Readme.txt].
+    If you are using a different version of Windows, see the [driver installation instructions](WindowsDriver/Readme.txt).
 
 
 4.  Install Arduino Firmware
 
-    If you are using your own Arduino board, you will need to flash the board with the custom firmware used by the lab.  This is done using the [Arduino IDE](https://www.arduino.cc/en/Main/Software).  The script that must be uploaded to the board is found [here][/ArduinoFirmware/ArduinoFirmware/ArduinoFirmware.ino].
+    If you are using your own Arduino board, you will need to flash the board with the custom firmware used by the lab.  This is done using the [Arduino IDE](https://www.arduino.cc/en/Main/Software).  The script that must be uploaded to the board is found [here](/ArduinoFirmware/ArduinoFirmware/ArduinoFirmware.ino).
 
 5. Run Python scripts
 
