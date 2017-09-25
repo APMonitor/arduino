@@ -38,23 +38,30 @@ if(successful==1):
         temp1_0 = a.readTemp()
         # Full power
         a.writeVoltage(255)
-        time.sleep(5)
+        time.sleep(10)
         # Check to see if temp is higher by at least 2 K
         temp1_1 = a.readTemp()
-        if(temp1_1 - temp1_0 < 2):
+        if(temp1_1 - temp1_0 < 0.5):
             print('Transistor 1 not heating')
             successful = 0
+        # Turn off transistor
+        a.writeVoltage(0)
             
         # Test Transistor 2
         temp2_0 = a.readTemp2()
         # Full power
         a.writeVoltage2(255)
-        time.sleep(5)
+        time.sleep(10)
         # Check to see if temp is higher by at least 2 K
         temp2_1 = a.readTemp2()
-        if(temp2_1 - temp2_0 < 2):
-            print('Transistor 1 not heating')
+        if(temp2_1 - temp2_0 < 0.5):
+            print('Transistor 2 not heating')
             successful = 0
+        # Turn off transistor
+        a.writeVoltage2(0)
+            
+    # Shutdown Arduino
+    a.close()
             
 if(successful==1):
     print('All tests passed')

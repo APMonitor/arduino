@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import serial
 import time
+from serial.tools import list_ports
+from serial import SerialException
 import pandas as pd
 import pyqtgraph as pg
 import numpy as np
