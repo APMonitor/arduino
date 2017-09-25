@@ -14,8 +14,8 @@ except:
     print('Could not connect to Arduino')
 
 # Continue with tests only if Arduino is connected
-print('Testing, please wait...')
 if(successful==1):
+    print('Testing, please wait...')
     
     # Test temperature sensor 1
     temp1 = a.readTemp()
@@ -59,4 +59,6 @@ if(successful==1):
 if(successful==1):
     print('All tests passed')
 else:
+    print('**************')
     print('Testing Failed')
+    print('**************')
