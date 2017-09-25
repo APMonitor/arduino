@@ -5,20 +5,11 @@ import pandas as pd
 import pyqtgraph as pg
 import numpy as np
 import sys
+import os
 
 class Arduino(object):
 
     def __init__(self, baud=9600, port=None, timeout=2, sr=None):
-        # Check to make sure output data file is closed        
-        try:
-            myfile = open("OutputFiles/data.xls",'w')
-            myfile.close()
-        except:
-            print('**********************************************************')
-            print('***Could not access OutputFiles/data.xls.****')
-            print('***Please close data.xls file before starting new run.****')
-            print('**********************************************************')
-            sys.exit()
         # Connect to serial port
         port = self.findPort()
         print('Opening connection')
@@ -110,9 +101,15 @@ class Arduino(object):
         '''
         Outputs collected data to excel file in OutputFiles folder
         '''
+        # Create OutputFiles directory if needed
+        if not os.path.exists('./OutputFiles'):
+            os.makedirs('./OutputFiles') 
+        # Save data to excel file
         df = pd.DataFrame(self.data)
         C = ['Time (s)', 'Voltage Out (mV)', 'Temperature (K)', 'T Setpoint (K)']
-        df.to_excel("OutputFiles/data.xls", header=C, index=False)
+        t = time.localtime()
+        timestamp = time.strftime('%b-%d-%Y_%H%M', t)  # Add timestamp to file
+        df.to_excel("OutputFiles/data-"+timestamp+".xls", header=C, index=False)
         print('Data Saved to Output folder')
         return True
         
