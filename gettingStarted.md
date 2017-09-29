@@ -15,7 +15,7 @@ Follow these steps to set up your Temperature Control Lab:
     The next step is to clone the repository containing the Python code for the lab.  This can be done either using the clone button above, or by using the command 
 
     ```
-    git clone ‘https://github.com/APMonitor/arduino.git’
+    git clone https://github.com/APMonitor/arduino.git
     ```
 
 2. Plug in Arduino  
@@ -28,6 +28,8 @@ Follow these steps to set up your Temperature Control Lab:
     *If you are using Windows 10, the Arduino board should connect without additional drivers required.*  
 
     If you are using a different version of Windows, see the [driver installation instructions](WindowsDriver/Readme.txt).
+    
+    Mac OS X users may need to install a serial driver. For arduino clones using the CH340G, CH34G or CH34X chipset, a suitable driver can be found at [https://github.com/MPParsley/ch340g-ch34g-ch34x-mac-os-x-driver](https://github.com/MPParsley/ch340g-ch34g-ch34x-mac-os-x-driver).
 
 
 4.  Install Arduino Firmware
