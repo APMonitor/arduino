@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Script to test basic functions of TClab and verify the firmware
+is functioning correctly. 
+
 Created on Fri Sep 29 14:18:34 2017
 
 @author: jeff

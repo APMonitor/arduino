@@ -70,7 +70,7 @@ class TClab(object):
         self._Q2 = int(self.writeArduino('Q2',pwm))
     
     def readArduino(self,cmd):
-        cmd_str = self.build_cmd_str(cmd,('',))
+        cmd_str = cmd
         try:
             self.sp.write(cmd_str.encode())
             self.sp.flush()
@@ -80,7 +80,7 @@ class TClab(object):
     
     def writeArduino(self,cmd,pwm):
         pwm = max(0,min(255,pwm))        
-        cmd_str = self.build_cmd_str(cmd,(pwm,))
+        cmd_str = "{cmd} {args}\n".format(cmd=cmd, args=pwm)
         try:
             self.sp.write(cmd_str.encode())
             self.sp.flush()
@@ -97,18 +97,3 @@ class TClab(object):
             print('Please unplug and replug Arduino.')
         return True
 
-    def build_cmd_str(self,cmd, args=None):
-        """
-        Build a command string that can be sent to the arduino.
-    
-        Input:
-            cmd (str): the command to send to the arduino
-            args (iterable): the arguments to send to the command
-    
-        @TODO: make separator and newline characters explicit.
-        """
-        if args:
-            args = ' '.join(map(str, args))
-        else:
-            args = ''
-        return "{cmd} {args}\n".format(cmd=cmd, args=args)
