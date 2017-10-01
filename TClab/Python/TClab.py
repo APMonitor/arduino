@@ -59,7 +59,7 @@ class TClab(object):
     
     @Q1.setter
     def Q1(self,pwm):
-        self._Q1 = self.writeArduino('Q1',pwm)
+        self._Q1 = int(self.writeArduino('Q1',pwm))
     
     @property
     def Q2(self):
@@ -67,7 +67,7 @@ class TClab(object):
     
     @Q2.setter
     def Q2(self,pwm):
-        self._Q2 = self.writeArduino('Q2',pwm)
+        self._Q2 = int(self.writeArduino('Q2',pwm))
     
     def readArduino(self,cmd):
         cmd_str = self.build_cmd_str(cmd,('',))
@@ -90,7 +90,7 @@ class TClab(object):
         
     def close(self):
         try:
-            self.sr.close()
+            self.sp.close()
             print('Arduino disconnected succesfully')
         except:
             print('Problems disconnecting from Arduino.')
@@ -102,11 +102,10 @@ class TClab(object):
         Build a command string that can be sent to the arduino.
     
         Input:
-            cmd (str): the command to send to the arduino, must not
-                contain a % character
+            cmd (str): the command to send to the arduino
             args (iterable): the arguments to send to the command
     
-        @TODO: a strategy is needed to escape % characters in the args
+        @TODO: make separator and newline characters explicit.
         """
         if args:
             args = ' '.join(map(str, args))
