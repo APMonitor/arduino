@@ -137,7 +137,7 @@ void AlarmCheck(void) {
 
 // update LED
 void LEDUpdate(void) {
-  // find led status
+  // determine led status
   ledStatus = brdStatus;
   if ((Q1 > 0) or (Q2 > 0)) {
     ledStatus = 2;
@@ -149,23 +149,23 @@ void LEDUpdate(void) {
     }
   }
   // update led depending on ledStatus
-  if (ledStatus == 0) {
+  if (ledStatus == 0) {               // board is off, no alarms, reset required
     analogWrite(pinLED1, 0);
   }
-  else if (ledStatus == 1) {
+  else if (ledStatus == 1) {          // normal operation with heaters off
     analogWrite(pinLED1, loLED);
   }
-  else if (ledStatus == 2) {
+  else if (ledStatus == 2) {          // normal operation with one or both heaters on
     analogWrite(pinLED1, hiLED);
   }
-  else if (ledStatus == 3) {
+  else if (ledStatus == 3) {          // high temperature alarm with heater off
     if ((millis() % 2000) > 1000) {
       analogWrite(pinLED1, loLED);
     } else {
       analogWrite(pinLED1, 0);
     }
   }
-  else if (ledStatus == 4) {
+  else if (ledStatus == 4) {          // hight temperature alarm with either heater on
     if ((millis() % 2000) > 1000) {
       analogWrite(pinLED1, hiLED);
     } else {
