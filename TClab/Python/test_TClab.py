@@ -15,25 +15,12 @@ a = TClab()
 # Get Version
 print(a.version)
 
-# Blink LED
-print('Blink LED')
-for k in range(0,4):
-    a.LED = 255
-    time.sleep(1)
-    a.LED = 0
-    time.sleep(1)
-    
-# LED Fade
-print('Fade LED')
-[a.setLED(k) for k in range(0,101)]
-[a.setLED(k) for k in range(101,0,-1)]
-
 # Read temperatures
 print("Temperature 1: = {0:0.2f} C".format(a.T1))
 print("Temperature 2: = {0:0.2f} C".format(a.T2))
 
 # Write Voltages
-print("\n Set Heaters to 100 pwm")
+print("\n Set Heaters to 100 mV")
 a.Q1 = 100
 a.Q2 = 100
 for i in range(0,65,5):
@@ -41,7 +28,7 @@ for i in range(0,65,5):
     print(sfmt.format(i, a.T1, a.T2))
     time.sleep(5)
 
-print("\n Set Heaters to 0 pwm")
+print("\n Set Heaters to 0 mV")
 a.Q1 = 0
 a.Q2 = 0
 for i in range(65,125,5):

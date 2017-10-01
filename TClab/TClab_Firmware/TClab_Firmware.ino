@@ -31,7 +31,7 @@ int alarmStatus = 0;           // hi temperature alarm status
 
 // constants
 const String vers = "0.1";     // version of this firmware
-const int baud = 19200;        // serial baud rate
+const int baud = 9600;         // serial baud rate
 const char sp = ' ';           // command separator
 const char nl = '\n';          // command terminator
 
@@ -182,8 +182,8 @@ void setup() {
     ; // wait for serial port to connect.
   }
   Serial.flush();
-  setHeater1(0);
-  setHeater2(0);
+  analogWrite(pinQ1,0);               // set to 0 without writing to serial
+  analogWrite(pinQ2,0);               // set to 0 without writing to serial
 }
 
 // arduino main event loop

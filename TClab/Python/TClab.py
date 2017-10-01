@@ -7,7 +7,7 @@ from serial.tools import list_ports
 
 class TClab(object):
 
-    def __init__(self, baud=9600, port=None, timeout=2):
+    def __init__(self, baud=9600, port=None, timeout=0):
         if (sys.platform == 'darwin') and not port:
             port = '/dev/tty.wchusbserial1410'
         else:
@@ -15,10 +15,9 @@ class TClab(object):
         print('Opening connection')
         self.sp = serial.Serial(port=port, baudrate=baud, timeout=timeout)
         time.sleep(3)
-        print('Arduino connected on port '+port)
+        print('Arduino connected on port ' + port)
         self.Q1 = 0
         self.Q2 = 0
-        self.LED = 0
         
     def findPort(self):
         found = False
@@ -60,12 +59,7 @@ class TClab(object):
     
     @Q1.setter
     def Q1(self,pwm):
-        self.writeArduino('Q1',pwm)
-        self._Q1 = pwm
-        
-    def setQ1(self,pwm):
-        self.writeArduino('Q1',pwm)
-        self._Q1 = pwm
+        self._Q1 = self.writeArduino('Q1',pwm)
     
     @property
     def Q2(self):
@@ -73,25 +67,7 @@ class TClab(object):
     
     @Q2.setter
     def Q2(self,pwm):
-        self.writeArduino('Q2',pwm)
-        self._Q2 = pwm
-        
-    def setQ2(self,pwm):
-        self.writeArduino('Q2',pwm)
-        self._Q2 = pwm
-        
-    @property
-    def LED(self):
-        return self._LED
-    
-    @LED.setter
-    def LED(self,pwm):
-        self.writeArduino('LED1',pwm)
-        self._LED = pwm
-
-    def setLED(self,pwm):
-        self.writeArduino('LED1',pwm)
-        self._LED = pwm
+        self._Q2 = self.writeArduino('Q2',pwm)
     
     def readArduino(self,cmd):
         cmd_str = self.build_cmd_str(cmd,('',))
@@ -109,7 +85,8 @@ class TClab(object):
             self.sp.write(cmd_str.encode())
             self.sp.flush()
         except:
-            pass
+            return None
+        return self.sp.readline().decode('UTF-8').replace("\r\n", "")
         
     def close(self):
         try:
