@@ -4,28 +4,30 @@
   This firmware is initially loaded into the Temperature Control Laboratory Arduino. 
   The firmware scans the serial port looking for case-insensitive commands:
 
-  Q int     set Heater 1, range 0 to 255,  limit to 150 to prevent overheating
-            (note: Q turns off Heater 2 as safety precaution)
-  Q1 int    set Heater 1, range 0 to 255,  limit to 150 to prevent overheating
-  Q2 int    set Heater 2, range 0 to 255,  limit to 150 to prevent overheating
-  T         get Temperature T1, returns deg C as sring
+  Q int     set Heater 1 and 2, range 0 to 255, subject to limits
+  Q1 int    set Heater 1, range 0 to 255 subject to limit
+  Q2 int    set Heater 2, range 0 to 255 subject to limit
   T1        get Temperature T1, returns deg C as string
   T2        get Temperature T2, returns dec C as string
   VERSION   get firmware version string
-  X         shutdown, set Q1, Q2 to zero
+  X         shutdown, reset required
 
-  LED1 is on during normal operation.
+  LED1 on dim during normal operation.
+  LED1 on bright when if either is on
+  LED1 blinks if high temperature alarm is on
 
-  LED1 is on bright for high temperature alarm.
-
-  Receipt of any unrecognized commands cause the board to shutdown and report
-  status by blinking LED1. Reset is required.
+  Receipt of any unrecognized commands cause the board to shutdown and  Reset is required.
 */
 
 // global variables
 char Buffer[64];               // buffer for parsing serial input
 String cmd;                    // command 
 int pv;                        // command pin value
+int ledStatus;                 // 0:off, 1:dim, 2:bright 3:dim blink 4:bright blink
+int brdStatus = 1;             // board status 0:reset required 1:ok
+int Q1 = 0;                    // last value written to Q1 pin
+int Q2 = 0;                    // last value written to Q2 poin
+int alarmStatus = 0;           // hi temperature alarm status
 
 // constants
 const String vers = "0.1";     // version of this firmware
@@ -41,12 +43,30 @@ const int pinQ2   = 5;         // Q2
 const int pinLED1 = 9;         // LED1
 
 // high limits expressed (units of pin values)
-const int limLED1 =  50;       // LED1 limit
 const int limQ1   = 150;       // Q1 limit
 const int limQ2   = 150;       // Q2 limit
 const int limT1   = 310;       // T1 high alarm (approx. 50 deg C)
 const int limT2   = 310;       // T2 high alarm (approx. 50 deg C)
 
+// LED1 levels
+const int hiLED   =  50;       // high limit of LED
+const int loLED   = hiLED/16;  // low LED
+
+void setHeater1(int pv) {
+  if (brdStatus > 0) {
+    Q1 = max(0, min(limQ1, pv));
+    analogWrite(pinQ1, Q1);
+    Serial.println(Q1);
+  }
+}
+
+void setHeater2(int pv) {
+  if (brdStatus > 0) {
+    Q2 = max(0, min(limQ2, pv));
+    analogWrite(pinQ2, Q2);
+    Serial.println(Q2);
+  }
+}
 
 // parse serial input
 void SerialParse(void) {
@@ -67,24 +87,18 @@ void SerialParse(void) {
   pv = data.toInt();
 }
 
-
 // dispatch commands
 void CommandDispatch(void) {
   // process commands
   if (cmd == "Q") {
-    analogWrite(pinQ1, max(0,min(limQ1,pv)));
-    analogWrite(pinQ2, 0);
+    setHeater1(pv);
+    setHeater2(pv);
   }
   else if (cmd == "Q1") {
-    analogWrite(pinQ1, max(0,min(limQ1,pv)));
+    setHeater1(pv);
   }
   else if (cmd == "Q2") {
-    analogWrite(pinQ2, max(0,min(limQ2,pv)));
-  }
-  else if (cmd == "T") {
-    float mV = (float)analogRead(pinT1) * (3300.0/1024.0);
-    float degC = (mV - 500.0)/10.0;
-    Serial.println(degC);
+    setHeater2(pv);
   }
   else if (cmd == "T1") {
     float mV = (float)analogRead(pinT1) * (3300.0/1024.0);
@@ -97,39 +111,70 @@ void CommandDispatch(void) {
     Serial.println(degC);
   }
   else if (cmd == "VERSION") {
-    Serial.println("TC Laboratory Firmware Version " + vers);
+    Serial.println("TClab Firmware Version " + vers);
   }
   // shutdown
-  else if (cmd == "X") {
-    analogWrite(pinQ1, 0);
-    analogWrite(pinQ2, 0);
-  }
-  // shut down on unrecognized command
-  else if (cmd.length() > 0) {
+  else if ((cmd == "X") or (cmd.length() > 0)) {
     Serial.println("Unrecognized command. Please reset.");
-    analogWrite(pinQ1, 0);
-    analogWrite(pinQ2, 0);
-    while (true) {
-      analogWrite(pinLED1, limLED1);
-      delay(250);
+    setHeater1(0);
+    setHeater2(0);
+    brdStatus = 0;
+  }
+}
+
+// check alarms and update status on LED1
+void AlarmCheck(void) {
+  if (analogRead(pinT1) > limT1) {
+    alarmStatus = 1;
+  }
+  else if (analogRead(pinT2) > limT2) {
+    alarmStatus = 1;
+  }
+  else {
+    alarmStatus = 0;
+  }
+}
+
+// update LED
+void LEDUpdate(void) {
+  // find led status
+  ledStatus = brdStatus;
+  if ((Q1 > 0) or (Q2 > 0)) {
+    ledStatus = 2;
+  }
+  if (alarmStatus > 0) {
+    ledStatus = 3;
+    if ((Q1 > 0) or (Q2 > 0)) {
+      ledStatus = 4;
+    }
+  }
+  // update led depending on ledStatus
+  if (ledStatus == 0) {
+    analogWrite(pinLED1, 0);
+  }
+  else if (ledStatus == 1) {
+    analogWrite(pinLED1, loLED);
+  }
+  else if (ledStatus == 2) {
+    analogWrite(pinLED1, hiLED);
+  }
+  else if (ledStatus == 3) {
+    if ((millis() % 2000) > 1000) {
+      analogWrite(pinLED1, loLED);
+    } else {
       analogWrite(pinLED1, 0);
-      delay(250);
+    }
+  }
+  else if (ledStatus == 4) {
+    if ((millis() % 2000) > 1000) {
+      analogWrite(pinLED1, hiLED);
+    } else {
+      analogWrite(pinLED1, 0);
     }
   }
 }
 
-
-// check alarms and update status on LED1
-void AlarmsCheck(void) {
-  if ((analogRead(pinT1) > limT1) or (analogRead(pinT2) > limT2)) {
-    analogWrite(pinLED1,limLED1);
-  } else {
-    analogWrite(pinLED1,limLED1/16);
-  }
-}
-
-
-// setup on reboot
+// arduino setup procedure
 void setup() {
   analogReference(EXTERNAL);
   Serial.begin(baud); 
@@ -137,14 +182,14 @@ void setup() {
     ; // wait for serial port to connect.
   }
   Serial.flush();
-  analogWrite(pinQ1,0);
-  analogWrite(pinQ2,0);
+  setHeater1(0);
+  setHeater2(0);
 }
 
-
-// main event loop
+// arduino main event loop
 void loop() {
   SerialParse();
   CommandDispatch();
-  AlarmsCheck();
+  AlarmCheck();
+  LEDUpdate();
 }
