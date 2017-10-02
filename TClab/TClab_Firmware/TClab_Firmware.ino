@@ -23,7 +23,7 @@ const String vers = "0.02";    // version of this firmware
 const int baud = 9600;         // serial baud rate
 const char sp = ' ';           // command separator
 const char nl = '\n';          // command terminator
-const int timeout = 120;       // device timeout in seconds
+const int timeout = 300;       // device timeout in seconds
 
 // pin numbers corresponding to signals on the TC Lab Shield
 const int pinT1   = 0;         // T1
