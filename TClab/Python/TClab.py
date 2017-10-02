@@ -5,18 +5,20 @@ import time
 from serial.tools import list_ports
 from math import ceil
 import random
-
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 class TClab(object):
 
-    def __init__(self, simulation=False, port=None, baud=9600, timeout=0):
+    def __init__(self, simulation=False, port=None, baud=9600):
         if not(simulation) :
             if (sys.platform == 'darwin') and not port:
                 port = '/dev/tty.wchusbserial1410'
             else:
                 port = self.findPort()
             print('Opening connection')
-            self.sp = serial.Serial(port=port, baudrate=baud, timeout=timeout)
+            self.sp = serial.Serial(port=port, baudrate=baud, timeout=2)
             time.sleep(3)
             print('TClab connected via Arduino on port ' + port)
             self.read = self.readArduino
@@ -27,10 +29,12 @@ class TClab(object):
             self.write = self.writeSimulation
             self.T1sim = 20.0
             self.T2sim = 20.0
-            self.tstart = time.time()   
-            self.tsim = 0
-        self._Q1 = 0
-        self._Q2 = 0
+        self.tstart = time.time()
+        self.tlog = 0
+        self.tprev = 0
+        #self._Q1 = 0
+        #self._Q2 = 0
+        self._log = []
         
     def findPort(self):
         found = False
@@ -58,11 +62,15 @@ class TClab(object):
     
     @property
     def T1(self):
-        return float(self.read('T1'))
+        self._T1 = float(self.read('T1'))
+        self.updateLog('T1',self._T1)
+        return self._T1
     
     @property
     def T2(self):
-        return float(self.read('T2'))
+        self._T2 = float(self.read('T2'))
+        self.updateLog('T2',self._T2)
+        return self._T2
     
     @property
     def Q1(self):
@@ -71,6 +79,7 @@ class TClab(object):
     @Q1.setter
     def Q1(self,pwm):
         self._Q1 = int(self.write('Q1',pwm))
+        self.updateLog('Q1',self._Q1)
     
     @property
     def Q2(self):
@@ -79,9 +88,39 @@ class TClab(object):
     @Q2.setter
     def Q2(self,pwm):
         self._Q2 = int(self.write('Q2',pwm))
+        self.updateLog('Q2',self._Q2)
+        
+    @property
+    def log(self):
+        df = pd.DataFrame(self._log, columns = ['Time','var','val'])
+        for key in ['Q1','Q2','T1','T2']:
+            u = df.loc[df['var'] == key,'val']
+            df.loc[u.index,key] = u
+        df.drop('val', inplace=True, axis=1)
+        df.drop('var', inplace=True, axis=1)
+        df.set_index('Time',inplace=True)
+        df = df.groupby(df.index).aggregate(np.mean)
+        df.fillna(method='ffill',inplace=True)
+        return df
+    
+    def updateLog(self,var,val):
+        tnow = time.time()-self.tstart
+        dt = tnow - self.tlog
+        self.tlog = tnow if dt > 0.01 else self.tlog
+        self._log.append([self.tlog, var, val])
+ 
+    def plot(self):
+        fig, axes = plt.subplots(nrows=2, ncols=1)
+        self.log[['Q1','Q2']].plot(grid=True, kind='line', 
+                drawstyle='steps-post', ax=axes[0])
+        axes[0].set_ylabel('mV')
+        self.log[['T1','T2']].plot(grid=True, kind='line', ax=axes[1])
+        axes[1].set_ylabel('deg C')
+        plt.tight_layout()
     
     def readArduino(self,cmd):
-        cmd_str = cmd
+        #cmd_str = cmd + ' \n'
+        cmd_str = self.build_cmd_str(cmd,'')
         try:
             self.sp.write(cmd_str.encode())
             self.sp.flush()
@@ -91,13 +130,32 @@ class TClab(object):
     
     def writeArduino(self,cmd,pwm):
         pwm = max(0,min(255,pwm))        
-        cmd_str = "{cmd} {args}\n".format(cmd=cmd, args=pwm)
+        #cmd_str = "{cmd} {args}\n".format(cmd=cmd, args=pwm)
+        cmd_str = self.build_cmd_str(cmd,(pwm,))
         try:
             self.sp.write(cmd_str.encode())
             self.sp.flush()
         except:
             return None
         return self.sp.readline().decode('UTF-8').replace("\r\n", "")
+    
+    def build_cmd_str(self,cmd, args=None):
+        """
+        Build a command string that can be sent to the arduino.
+    
+        Input:
+            cmd (str): the command to send to the arduino, must not
+                contain a % character
+            args (iterable): the arguments to send to the command
+    
+        @TODO: a strategy is needed to escape % characters in the args
+        """
+        if args:
+            args = ' '.join(map(str, args))
+        else:
+            args = ''
+        return "{cmd} {args}\n".format(cmd=cmd, args=args)
+
     
     def readSimulation(self,cmd):
         self.updateSimulation()
@@ -113,15 +171,17 @@ class TClab(object):
         return "{pwm}".format(pwm=pwm).encode()
     
     def updateSimulation(self):
-        tprev = self.tsim
-        self.tsim = time.time() - self.tstart
-        n = ceil((self.tsim - tprev)/0.5)
-        dt = (self.tsim - tprev)/n
+        tnow = time.time() - self.tstart
+        n = ceil((tnow - self.tprev)/0.5)
+        dt = (tnow - self.tprev)/n
+        self.tprev = time.time() - self.tstart
         for k in range(0,n):
-            self.T1sim += 0.01*dt*(random.gauss(1,.05)*self._Q1 - 
+            dT1 = 0.1*dt*(random.gauss(1,.05)*self._Q1 - 
                             (self.T1sim - 20.0) - 0.2*(self.T2sim - 20.0))
-            self.T2sim += 0.01*dt*(random.gauss(1,.05)*self._Q2 - 
+            dT2 = 0.1*dt*(random.gauss(1,.05)*self._Q2 - 
                             (self.T2sim - 20.0) - 0.2*(self.T1sim - 20.0))
+            self.T1sim += dT1
+            self.T2sim += dT2
         
     def close(self):
         try:

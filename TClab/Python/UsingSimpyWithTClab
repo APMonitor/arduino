@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Oct  1 20:58:41 2017
+
+@author: jeff
+"""
+
+import simpy.rt
+from TClab impor TClab
+
+def board(env):
+    while True:
+        print(env.now, a.T1, a.T2)
+        yield env.timeout(2)
+        
+a = TClab(simulation=True)
+a.Q1 = 100
+a.Q2 = 50
+
+env = simpy.rt.RealtimeEnvironment()
+env.process(board(env))
+env.run(until=10)

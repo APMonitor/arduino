@@ -13,7 +13,8 @@ from TClab import TClab
 import time
 
 # Connect to Arduino
-a = TClab(simulation=True)
+#a = TClab(simulation=True)
+a = TClab()
 
 # Get Version
 print(a.version)
@@ -31,7 +32,7 @@ print("Set Heater 1 to {0:d} mV".format(a.Q1))
 print("Set Heater 2 to {0:d} mV".format(a.Q2))
 sfmt = "   {0:3d} sec:   T1 = {1:0.2f} C    T2 = {2:0.2f} C"
 for i in range(0,65,5):
-    print(sfmt.format(i, a.T1, a.T2))
+    print(sfmt.format(i, a.T1, a.T2), flush=True)
     time.sleep(5)
 
 a.Q1 = 0
@@ -40,7 +41,9 @@ print()
 print("Set Heater 1 to {0:d} mV".format(a.Q1))
 print("Set Heater 2 to {0:d} mV".format(a.Q2))
 for i in range(65,125,5):
-    print(sfmt.format(i, a.T1, a.T2))
+    print(sfmt.format(i, a.T1, a.T2), flush=True)
     time.sleep(5)
+    
+a.plot()
 
 #a.close()
