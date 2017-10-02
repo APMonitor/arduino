@@ -4,7 +4,6 @@
   This firmware is initially loaded into the Temperature Control Laboratory Arduino. 
   The firmware scans the serial port looking for case-insensitive commands:
 
-  Q int     set Heater 1 and 2, range 0 to 255, subject to limits
   Q1 int    set Heater 1, range 0 to 255 subject to limit
   Q2 int    set Heater 2, range 0 to 255 subject to limit
   T1        get Temperature T1, returns deg C as string
@@ -16,24 +15,15 @@
   LED1 on bright when if either is on
   LED1 blinks if high temperature alarm is on
 
-  Receipt of any unrecognized commands cause the board to shutdown and  Reset is required.
+  Receipt of any unrecognized commands cause the board to shutdown and Reset is required.
 */
-
-// global variables
-char Buffer[64];               // buffer for parsing serial input
-String cmd;                    // command 
-int pv;                        // command pin value
-int ledStatus;                 // 0:off, 1:dim, 2:bright 3:dim blink 4:bright blink
-int brdStatus = 1;             // board status 0:reset required 1:ok
-int Q1 = 0;                    // last value written to Q1 pin
-int Q2 = 0;                    // last value written to Q2 poin
-int alarmStatus = 0;           // hi temperature alarm status
 
 // constants
 const String vers = "0.1";     // version of this firmware
 const int baud = 9600;         // serial baud rate
 const char sp = ' ';           // command separator
 const char nl = '\n';          // command terminator
+const int timeout = 120;       // device timeout in seconds
 
 // pin numbers corresponding to signals on the TC Lab Shield
 const int pinT1   = 0;         // T1
@@ -45,18 +35,29 @@ const int pinLED1 = 9;         // LED1
 // high limits expressed (units of pin values)
 const int limQ1   = 150;       // Q1 limit
 const int limQ2   = 150;       // Q2 limit
-const int limT1   = 310;       // T1 high alarm (approx. 50 deg C)
-const int limT2   = 310;       // T2 high alarm (approx. 50 deg C)
+const int limT1   = 310;       // T1 high alarm (50 deg C)
+const int limT2   = 310;       // T2 high alarm (50 deg C)
 
 // LED1 levels
 const int hiLED   =  50;       // high limit of LED
 const int loLED   = hiLED/16;  // low LED
 
+// global variables
+char Buffer[64];               // buffer for parsing serial input
+String cmd;                    // command 
+int pv;                        // command pin value
+int ledStatus;                 // 0:off, 1:dim, 2:bright 3:dim blink 4:bright blink
+int brdStatus = 1;             // board status 0:reset required 1:ok
+int Q1 = 0;                    // last value written to Q1 pin
+int Q2 = 0;                    // last value written to Q2 poin
+int alarmStatus = 0;           // hi temperature alarm status
+int tprev;                     // millis for last command
+
+// set Heaters to value. Hard limits imposed.
 void setHeater1(int pv) {
   if (brdStatus > 0) {
     Q1 = max(0, min(limQ1, pv));
     analogWrite(pinQ1, Q1);
-    Serial.println(Q1);
   }
 }
 
@@ -64,7 +65,6 @@ void setHeater2(int pv) {
   if (brdStatus > 0) {
     Q2 = max(0, min(limQ2, pv));
     analogWrite(pinQ2, Q2);
-    Serial.println(Q2);
   }
 }
 
@@ -74,7 +74,7 @@ void SerialParse(void) {
   int ByteCount = Serial.readBytesUntil(nl,Buffer,sizeof(Buffer));
   String read_ = String(Buffer);
   memset(Buffer,0,sizeof(Buffer));
-  
+   
   // separate command from associated data
   int idx = read_.indexOf(sp);
   cmd = read_.substring(0,idx);
@@ -85,20 +85,27 @@ void SerialParse(void) {
   String data = read_.substring(idx+1);
   data.trim();
   pv = data.toInt();
+
+  // issue shutdown if no command received in within timeout seconds
+  if (ByteCount > 0) {
+    tprev = millis();
+  } else {
+    if ((millis() - tprev) > 1000*timeout) {
+      cmd = "X";
+    }
+  }
 }
 
 // dispatch commands
 void CommandDispatch(void) {
   // process commands
-  if (cmd == "Q") {
+  if (cmd == "Q1") {
     setHeater1(pv);
-    setHeater2(pv);
-  }
-  else if (cmd == "Q1") {
-    setHeater1(pv);
+    Serial.println(Q1);
   }
   else if (cmd == "Q2") {
     setHeater2(pv);
+    Serial.println(Q2);
   }
   else if (cmd == "T1") {
     float mV = (float)analogRead(pinT1) * (3300.0/1024.0);
@@ -115,7 +122,7 @@ void CommandDispatch(void) {
   }
   // shutdown
   else if ((cmd == "X") or (cmd.length() > 0)) {
-    Serial.println("Unrecognized command. Please reset.");
+    Serial.println("TClab in Sleep Mode. Please reset.");
     setHeater1(0);
     setHeater2(0);
     brdStatus = 0;
@@ -181,9 +188,8 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect.
   }
-  Serial.flush();
-  analogWrite(pinQ1,0);               // set to 0 without writing to serial
-  analogWrite(pinQ2,0);               // set to 0 without writing to serial
+  setHeater1(0);
+  setHeater2(0);
 }
 
 // arduino main event loop
