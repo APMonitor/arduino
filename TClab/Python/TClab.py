@@ -4,6 +4,7 @@ import serial
 import time
 from serial.tools import list_ports
 from math import ceil
+import random
 
 
 class TClab(object):
@@ -57,13 +58,11 @@ class TClab(object):
     
     @property
     def T1(self):
-        self._T1 = float(self.read('T1'))
-        return self._T1
+        return float(self.read('T1'))
     
     @property
     def T2(self):
-        self._T2 = float(self.read('T2'))
-        return self._T2
+        return float(self.read('T2'))
     
     @property
     def Q1(self):
@@ -110,7 +109,7 @@ class TClab(object):
     
     def writeSimulation(self,cmd,pwm):
         self.updateSimulation()
-        pwm = max(0,min(255,pwm))
+        pwm = max(0,min(150,pwm))
         return "{pwm}".format(pwm=pwm).encode()
     
     def updateSimulation(self):
@@ -119,8 +118,10 @@ class TClab(object):
         n = ceil((self.tsim - tprev)/0.5)
         dt = (self.tsim - tprev)/n
         for k in range(0,n):
-            self.T1sim += 0.01*dt*(self._Q1 - (self.T1sim - 20.0) - 0.2*(self.T2sim - 20.0))
-            self.T2sim += 0.01*dt*(self._Q2 - (self.T2sim - 20.0) - 0.2*(self.T1sim - 20.0))
+            self.T1sim += 0.01*dt*(random.gauss(1,.05)*self._Q1 - 
+                            (self.T1sim - 20.0) - 0.2*(self.T2sim - 20.0))
+            self.T2sim += 0.01*dt*(random.gauss(1,.05)*self._Q2 - 
+                            (self.T2sim - 20.0) - 0.2*(self.T1sim - 20.0))
         
     def close(self):
         try:
