@@ -2,7 +2,7 @@
 .DS_Store
 
 # provide a development folder
-#development/
+TCLab/evelopment/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
