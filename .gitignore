@@ -1,6 +1,9 @@
 # MacOS Desktop Services for files
 .DS_Store
 
+# provide a development folder
+development/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
