@@ -2,7 +2,7 @@
 .DS_Store
 
 # provide a development folder
-development/
+#development/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
