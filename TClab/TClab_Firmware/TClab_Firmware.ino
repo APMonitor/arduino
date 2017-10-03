@@ -7,13 +7,13 @@
   provide a high level interface to the Temperature Control Lab. The firmware
   scans the serial port looking for case-insensitive commands:
 
+  A         software restart
   Q1 int    set Heater 1, range 0 to 255 subject to limit
   Q2 int    set Heater 2, range 0 to 255 subject to limit
   T1        get Temperature T1, returns deg C as string
   T2        get Temperature T2, returns dec C as string
-  VERSION   get firmware version string
-  X         enter sleep mode, reset required
-  A         software reset
+  V         get firmware version string
+  X         stop, enter sleep mode
 
   Limits on the heater can be configured with the constants below.
 
@@ -78,7 +78,7 @@ int brdStatus = 1;             // board status 0:sleep, 1:normal
 int Q1 = 0;                    // last value written to Q1 pin
 int Q2 = 0;                    // last value written to Q2 poin
 int alarmStatus;               // hi temperature alarm status
-int tprev;                     // millis for last command
+int tlast;                     // millis when last host command
 
 // set Heater 1 to pv with hard limits imposed.
 void setHeater1(int pv) {
@@ -111,13 +111,16 @@ void parseSerial(void) {
   String data = read_.substring(idx+1);
   data.trim();
   pv = data.toInt();
+}
 
-  // issue sleep command if we haven't heard from the host in timeout seconds
-  if (ByteCount > 0) {
-    tprev = millis();
+void checkTimeout(void) {
+  if (cmd.length() > 0) {
+    tlast = millis();
   } else {
-    if ((long) (millis() - tprev) > (long) 1000*timeout) {
-      cmd = "X";
+    if ((long) (millis() - tlast) > (long) 1000*timeout) {
+      setHeater1(0);
+      setHeater2(0);
+      brdStatus = 0;
     }
   }
 }
@@ -127,7 +130,7 @@ void dispatchCommand(void) {
     brdStatus = 1;
     setHeater1(0);
     setHeater2(0);
-    Serial.println("OK");
+    Serial.println("Start");
   }
   else if (cmd == "Q1") {
     setHeater1(pv);
@@ -147,14 +150,14 @@ void dispatchCommand(void) {
     float degC = (mV - 500.0)/10.0;
     Serial.println(degC);
   }
-  else if (cmd == "VERSION") {
+  else if (cmd == "V") {
     Serial.println("TClab Firmware Version " + vers);
   }
   else if ((cmd == "X") or (cmd.length() > 0)) {
     setHeater1(0);
     setHeater2(0);
     brdStatus = 0;
-    Serial.println("Sleep");
+    Serial.println("Stop");
   }
 }
 
@@ -223,6 +226,7 @@ void setup() {
 // arduino main event loop
 void loop() {
   parseSerial();
+  checkTimeout();
   dispatchCommand();
   checkAlarm();
   updateStatus();

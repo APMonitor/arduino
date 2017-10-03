@@ -17,6 +17,8 @@ class TCLab(object):
             port = self.findPort()
         print('Opening connection')
         self.sp = serial.Serial(port=port, baudrate=baud, timeout=2)
+        self.sp.flushInput()
+        self.sp.flushOutput()
         time.sleep(3)
         print('TCLab connected via Arduino on port ' + port)
         self.start()
@@ -55,7 +57,7 @@ class TCLab(object):
     
     @property
     def version(self):
-        return self.read('version')
+        return self.read('V')
     
     @property
     def T1(self):
@@ -143,8 +145,6 @@ class TCLab(object):
             cmd (str): the command to send to the arduino, must not
                 contain a % character
             args (iterable): the arguments to send to the command
-    
-        @TODO: a strategy is needed to escape % characters in the args
         """
         if args:
             args = ' '.join(map(str, args))
