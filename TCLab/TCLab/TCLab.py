@@ -217,7 +217,7 @@ class TCLab(object):
     def close(self):
         try:
             self.sp.close()
-            print('Arduino disconnected succesfully')
+            print('Arduino disconnected successfully')
         except:
             print('Problems disconnecting from Arduino.')
             print('Please unplug and replug Arduino.')
