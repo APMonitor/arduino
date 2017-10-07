@@ -7,7 +7,30 @@ from math import ceil
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from IPython import display
 
+class TCLabClockError(RuntimeError):
+    def __init__(self, message):
+        RuntimeError.__init__(self, message)
+
+def clock(tfinal, tstep=1, strict=True):
+    start_time = time.time()
+    prev_time = start_time
+    fuzz = 0.005
+    k = 0
+    while (prev_time-start_time) <= tfinal  + fuzz:
+        if strict and ((prev_time - start_time) > (k*tstep + fuzz)):
+            raise TCLabClockError("TCLab failed to keep up with real time.")
+        yield round(prev_time - start_time,2)
+        if strict:
+            tsleep = (k+1)*tstep - (time.time() - start_time) - fuzz
+        else:
+            tsleep = tstep - (time.time() - prev_time) - fuzz
+        if tsleep >= fuzz:
+            time.sleep(tsleep)
+        prev_time = time.time()
+        k += 1
+        
 class TCLab(object):
 
     def __init__(self, port=None, baud=9600):
@@ -43,6 +66,45 @@ class TCLab(object):
             port = 'COM3'
         return port
     
+    def initplot(self,tf):
+        # create an empty plot, and keep the line object around
+        plt.figure(figsize=(12,6))
+        plt.subplot(2,1,1)
+        self.line_T1, = plt.plot([],[],lw=2,alpha=0.6)
+        self.line_T2, = plt.plot([],[],lw=2,alpha=0.6)
+        plt.xlim(0,tf)
+        plt.ylim(15,85)
+        plt.title('Temperature Control Lab')
+        plt.ylabel('deg C')
+        plt.xlabel('Seconds')
+        plt.legend(['T1','T2'])
+        plt.grid()
+
+        plt.subplot(2,1,2)
+        self.line_Q1, = plt.step([],[],where='post',lw=2,alpha=0.6)
+        self.line_Q2, = plt.step([],[],where='post',lw=2,alpha=0.6)
+        plt.xlim(0,tf)
+        plt.ylim(-5,105)
+        plt.ylabel('mV')
+        plt.xlabel('Seconds')
+        plt.legend(['Q1','Q2'])
+        plt.grid()
+
+        plt.tight_layout()
+        
+    def updateplot(self):
+        tp = time.time() - self.tstart
+        self.line_T1.set_xdata(np.append(self.line_T1.get_xdata(),tp))
+        self.line_T1.set_ydata(np.append(self.line_T1.get_ydata(),self.T1))
+        self.line_T2.set_xdata(np.append(self.line_T2.get_xdata(),tp))
+        self.line_T2.set_ydata(np.append(self.line_T2.get_ydata(),self.T2))
+        self.line_Q1.set_xdata(np.append(self.line_Q1.get_xdata(),tp))
+        self.line_Q1.set_ydata(np.append(self.line_Q1.get_ydata(),self.Q1))
+        self.line_Q2.set_xdata(np.append(self.line_Q2.get_xdata(),tp))
+        self.line_Q2.set_ydata(np.append(self.line_Q2.get_ydata(),self.Q2))
+        display.clear_output(wait=True)
+        display.display(plt.gcf())
+
     def start(self):
         self.tstart = time.time()
         self.tlog = 0
