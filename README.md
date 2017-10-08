@@ -63,8 +63,8 @@ Combines MHE for online model parameter estimation with advanced MPC control to 
 
 For more information and instructional videos, visit the [Arduino temperature control lab page](http://apmonitor.com/pdc/index.php/Main/ArduinoTemperatureControl) on the BYU Process Dynamics and Control course website.
 
-## Matlab Version
+## Matlab Support
 
-A [Matlab version of the lab](http://apmonitor.com/do/index.php/Main/ArduinoLab) is also available.
+MATLAB must be installed and configured with an add-on package as [shown here for MATLAB 2017b](https://youtu.be/waWgl7-D8GM). This allows MATLAB to connect to the Arduino device with the command *a = arduino*. [MATLAB files](./0_Test_Device/MATLAB) and [Simulink models](./0_Test_Device/Simulink) are available to test the basic functionality of the heaters and sensors.
 
 
