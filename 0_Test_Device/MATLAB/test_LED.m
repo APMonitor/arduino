@@ -8,8 +8,13 @@ catch
     disp('For Windows:')
     disp('  Open device manager, select "Ports (COM & LPT)"')
     disp('  Look for COM port of Arduino such as COM4')
-    com_port = input('Specify COM port (e.g. COM4): ','s');
-    com_port = upper(com_port);
+    disp('For MacOS:')
+    disp('  Open terminal and type: ls /dev/*.')
+    disp('  Search for /dev/tty.usbmodem* or /dev/tty.usbserial*. The port number is *.')
+    disp('For Linux')
+    disp('  Open terminal and type: ls /dev/tty*')
+    disp('  Search for /dev/ttyUSB* or /dev/ttyACM*. The port number is *.')
+    com_port = input('Specify COM port (e.g. COM4 for Windows or /dev/ttyUSB0 for Linux): ','s');
     a = arduino(com_port,'Uno');
     disp(a)
 end
