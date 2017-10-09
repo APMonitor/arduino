@@ -8,7 +8,7 @@ catch
     disp('For Windows:')
     disp('  Open device manager, select "Ports (COM & LPT)"')
     disp('  Look for COM port of Arduino such as COM4')
-    com_port = input('Specify COM port (e.g. COM4):');
+    com_port = input('Specify COM port (e.g. COM4): ','s');
     com_port = upper(com_port);
     a = arduino(com_port,'Uno');
     disp(a)
