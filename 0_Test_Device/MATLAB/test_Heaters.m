@@ -8,13 +8,19 @@ TF = @(V) TK(V) * 9.0/5.0 - 459.67; % Fahrenhiet
 % connect to Arduino
 try
     a = arduino;
-    disp('Arduino Connected')
+    disp(a)
 catch
     warning('Unable to connect, user input required')
     disp('For Windows:')
     disp('  Open device manager, select "Ports (COM & LPT)"')
     disp('  Look for COM port of Arduino such as COM4')
-    com_port = upper(input('Specify COM port (e.g. COM4):'));
+    disp('For MacOS:')
+    disp('  Open terminal and type: ls /dev/*.')
+    disp('  Search for /dev/tty.usbmodem* or /dev/tty.usbserial*. The port number is *.')
+    disp('For Linux')
+    disp('  Open terminal and type: ls /dev/tty*')
+    disp('  Search for /dev/ttyUSB* or /dev/ttyACM*. The port number is *.')
+    com_port = input('Specify COM port (e.g. COM4 for Windows or /dev/ttyUSB0 for Linux): ','s');
     a = arduino(com_port,'Uno');
     disp(a)
 end
@@ -81,13 +87,13 @@ for i = 1:290
     n = length(T1p);
     time = linspace(0,n+1,n);
     clf
-    subplot(2,1,2)
+    subplot(2,1,1)
     plot(time,T1p,'r.','MarkerSize',10);
     hold on
     plot(time,T2p,'b.','MarkerSize',10);
     ylabel('Temperature (degC)')
     legend('Temperature 1','Temperature 2','Location','NorthWest')
-    subplot(2,1,1)
+    subplot(2,1,2)
     plot(time,H1p,'r-','LineWidth',2);
     hold on
     plot(time,H2p,'b--','LineWidth',2);
