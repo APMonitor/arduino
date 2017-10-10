@@ -1,30 +1,14 @@
 close all; clear all; clc
 
-try
-    a = arduino;
-    disp(a)
-catch
-    warning('Unable to connect, user input required')
-    disp('For Windows:')
-    disp('  Open device manager, select "Ports (COM & LPT)"')
-    disp('  Look for COM port of Arduino such as COM4')
-    disp('For MacOS:')
-    disp('  Open terminal and type: ls /dev/*.')
-    disp('  Search for /dev/tty.usbmodem* or /dev/tty.usbserial*. The port number is *.')
-    disp('For Linux')
-    disp('  Open terminal and type: ls /dev/tty*')
-    disp('  Search for /dev/ttyUSB* or /dev/ttyACM*. The port number is *.')
-    com_port = input('Specify COM port (e.g. COM4 for Windows or /dev/ttyUSB0 for Linux): ','s');
-    a = arduino(com_port,'Uno');
-    disp(a)
-end
-    
+% include tclab.m for initialization
+tclab;
+
 % Write data to the digital pin
 disp('LED on and off repeatedly for 5 seconds')
 for i = 0:5
-    writeDigitalPin(a,'D9',1);
+    led(1)
     pause(0.5);
-    writeDigitalPin(a,'D9',0);
+    led(0)
     pause(0.5);
 end
 
@@ -32,7 +16,7 @@ end
 %  digital pin's PWM duty cycle.
 disp('LED dimming from bright to off over 10 seconds')
 for brightness = 1:-0.1:0
-    writePWMDutyCycle(a,'D9',brightness);
+    led(brightness);
     pause(1.0);
 end
 
