@@ -1,35 +1,12 @@
-#!/usr/bin/env python
 import sys
-import serial
 import time
+import serial
 from serial.tools import list_ports
-from math import ceil
+from math import ceil, floor
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython import display
-
-class TCLabClockError(RuntimeError):
-    def __init__(self, message):
-        RuntimeError.__init__(self, message)
-
-def clock(tfinal, tstep=1, strict=True):
-    start_time = time.time()
-    prev_time = start_time
-    fuzz = 0.005
-    k = 0
-    while (prev_time-start_time) <= tfinal  + fuzz:
-        if strict and ((prev_time - start_time) > (k*tstep + fuzz)):
-            raise TCLabClockError("TCLab failed to keep up with real time.")
-        yield round(prev_time - start_time,2)
-        if strict:
-            tsleep = (k+1)*tstep - (time.time() - start_time) - fuzz
-        else:
-            tsleep = tstep - (time.time() - prev_time) - fuzz
-        if tsleep >= fuzz:
-            time.sleep(tsleep)
-        prev_time = time.time()
-        k += 1
         
 class TCLab(object):
 
@@ -66,23 +43,22 @@ class TCLab(object):
             port = 'COM3'
         return port
     
-    def initplot(self,tf):
+    def initplot(self,tf=20):
         # create an empty plot, and keep the line object around
         plt.figure(figsize=(12,6))
-        plt.subplot(2,1,1)
-        self.line_T1, = plt.plot([],[],lw=2,alpha=0.6)
-        self.line_T2, = plt.plot([],[],lw=2,alpha=0.6)
+        self.ax1 = plt.subplot(2,1,1)
+        self.line_T1, = plt.plot(0,self.T1,lw=2,alpha=0.8)
+        self.line_T2, = plt.plot(0,self.T2,lw=2,alpha=0.8)
         plt.xlim(0,tf)
-        plt.ylim(15,85)
         plt.title('Temperature Control Lab')
         plt.ylabel('deg C')
         plt.xlabel('Seconds')
         plt.legend(['T1','T2'])
         plt.grid()
 
-        plt.subplot(2,1,2)
-        self.line_Q1, = plt.step([],[],where='post',lw=2,alpha=0.6)
-        self.line_Q2, = plt.step([],[],where='post',lw=2,alpha=0.6)
+        self.ax2 = plt.subplot(2,1,2)
+        self.line_Q1, = plt.step([],[],where='post',lw=2,alpha=0.8)
+        self.line_Q2, = plt.step([],[],where='post',lw=2,alpha=0.8)
         plt.xlim(0,tf)
         plt.ylim(-5,105)
         plt.ylabel('mV')
@@ -94,14 +70,22 @@ class TCLab(object):
         
     def updateplot(self):
         tp = time.time() - self.tstart
+        T1,T2,Q1,Q2 = self.T1,self.T2,self.Q1,self.Q2
         self.line_T1.set_xdata(np.append(self.line_T1.get_xdata(),tp))
-        self.line_T1.set_ydata(np.append(self.line_T1.get_ydata(),self.T1))
+        self.line_T1.set_ydata(np.append(self.line_T1.get_ydata(),T1))
         self.line_T2.set_xdata(np.append(self.line_T2.get_xdata(),tp))
-        self.line_T2.set_ydata(np.append(self.line_T2.get_ydata(),self.T2))
+        self.line_T2.set_ydata(np.append(self.line_T2.get_ydata(),T2))
         self.line_Q1.set_xdata(np.append(self.line_Q1.get_xdata(),tp))
-        self.line_Q1.set_ydata(np.append(self.line_Q1.get_ydata(),self.Q1))
+        self.line_Q1.set_ydata(np.append(self.line_Q1.get_ydata(),Q1))
         self.line_Q2.set_xdata(np.append(self.line_Q2.get_xdata(),tp))
-        self.line_Q2.set_ydata(np.append(self.line_Q2.get_ydata(),self.Q2))
+        self.line_Q2.set_ydata(np.append(self.line_Q2.get_ydata(),Q2))
+        if tp > self.ax1.get_xlim()[1]:
+            self.ax1.set_xlim(0,1.5*self.ax1.get_xlim()[1])
+            self.ax2.set_xlim(0,1.5*self.ax2.get_xlim()[1])
+        Tmax = max(max(self.line_T1.get_ydata()),max(self.line_T2.get_ydata()))
+        Tmin = min(min(self.line_T1.get_ydata()),min(self.line_T2.get_ydata()))
+        if (Tmax > self.ax1.get_ylim()[1]) or (Tmin < self.ax1.get_ylim()[0]):
+            self.ax1.set_ylim(5*floor(Tmin/5), 5*ceil(Tmax/5))        
         display.clear_output(wait=True)
         display.display(plt.gcf())
 
