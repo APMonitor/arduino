@@ -1,45 +1,54 @@
-from arduino import Arduino
+import tclab
+import numpy as np
 import time
 
-# Connect to Arduino
-a = Arduino()
+try:
+    # Connect to Arduino
+    a = tclab.TCLab()
 
-# Read temperature 1
-TF = a.readTempF()
-TC = a.readTempC()
-print('Temperature 1: ' + str(TC) + ' degC or ' + str(TF) + ' degF')
+    # Get Version
+    print(a.version)
 
-# Read temperature 2
-TF2 = a.readTempF2()
-TC2 = a.readTempC2()
-print('Temperature 2: ' + str(TC2) + ' degC or ' + str(TF2) + ' degF')
+    # Temperatures
+    print('Temperatures')
+    print('Temperature 1: ' + str(a.T1) + ' degC')
+    print('Temperature 2: ' + str(a.T2) + ' degC')
 
+    # Turn LED on
+    print('LED On')
+    a.LED(100)
 
-# Turn on heaters (0-255)
-a.writeVoltage(250)
-a.writeVoltage2(150)
+    # Turn on Heaters (0-100%)
+    print('Turn On Heaters (Q1=90%, Q2=80%)')
+    a.Q1(90.0)
+    a.Q2(80.0)
 
-# Turn on LED
-a.led(100)
+    # Sleep (sec)
+    time.sleep(60.0)
 
-# Wait 20 seconds
-print('Heating for 20 seconds')
-time.sleep(20)
+    # Turn Off Heaters
+    print('Turn Off Heaters')
+    a.Q1(0.0)
+    a.Q2(0.0)
 
-# Turn off LED
-a.led(0)
-
-# Turn off heaters
-a.writeVoltage(0)
-a.writeVoltage2(0)
-
-
-# Read temperature 1
-TF = a.readTempF()
-TC = a.readTempC()
-print('Temperature 1: ' + str(TC) + ' degC or ' + str(TF) + ' degF')
-
-# Read temperature 2
-TF2 = a.readTempF2()
-TC2 = a.readTempC2()
-print('Temperature 2: ' + str(TC2) + ' degC or ' + str(TF2) + ' degF')
+    # Temperatures
+    print('Temperatures')
+    print('Temperature 1: ' + str(a.T1) + ' degC')
+    print('Temperature 2: ' + str(a.T2) + ' degC')
+    
+# Allow user to end loop with Ctrl-C           
+except KeyboardInterrupt:
+    # Disconnect from Arduino
+    a.Q1(0)
+    a.Q2(0)
+    print('Shutting down')
+    a.close()
+    
+# Make sure serial connection still closes when there's an error
+except:           
+    # Disconnect from Arduino
+    a.Q1(0)
+    a.Q2(0)
+    print('Error: Shutting down')
+    a.close()
+    raise

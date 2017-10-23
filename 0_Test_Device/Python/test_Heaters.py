@@ -1,94 +1,119 @@
-from arduino import Arduino
+import tclab
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 # Connect to Arduino
-a = Arduino()
+a = tclab.TCLab()
 
-# Set up plotting
-a.initPlots()
+# Get Version
+print(a.version)
+
+# Turn LED on
+print('LED On')
+a.LED(100)
 
 # Run time in minutes
 run_time = 10.0
 
 # Number of cycles
 loops = int(60.0*run_time)
+tm = np.zeros(loops)
 
 # Temperature (K)
-Tsp1 = np.ones(loops) * 320.0 # set point
-T1 = np.ones(loops) * a.readTemp() # measured T
+Tsp1 = np.ones(loops) * 23.0 # set point (degC)
+T1 = np.ones(loops) * a.T1 # measured T (degC)
 
-Tsp2 = np.ones(loops) * 300.0 # set point
-T2 = np.ones(loops) * a.readTemp2() # measured T
+Tsp2 = np.ones(loops) * 23.0 # set point (degC)
+T2 = np.ones(loops) * a.T2 # measured T (degC)
 
-# milli-volts step test (0 - 150 mV)
-mV1 = np.ones(loops) * 0.0
-mV1[20:] = 150.0
+# step test (0 - 100%)
+Q1 = np.ones(loops) * 0.0
+Q2 = np.ones(loops) * 0.0
+Q1[10:] = 80.0
 
-mV2 = np.ones(loops) * 0.0
-mV2[60:] = 120.0
+print('Running Main Loop. Ctrl-C to end.')
+print('  Time   Q1     Q2    T1     T2')
+print('{:6.1f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}'.format(tm[0], \
+                                                       Q1[0], \
+                                                       Q2[0], \
+                                                       T1[0], \
+                                                       T2[0]))
+
+# Create plot
+plt.figure(figsize=(10,7))
+plt.ion()
+plt.show()
 
 # Main Loop
 start_time = time.time()
 prev_time = start_time
 try:
-    print('Running Main Loop. Ctrl-C to record data and end.')
-    print('      Time  milliVolt Temperature  milliVolt Temperature')
-    for i in range(loops-1):
-            # Sleep time
-            sleep_max = 1.0
-            sleep = sleep_max - (time.time() - prev_time)
-            if sleep>=0.01:
-                time.sleep(sleep)
-            else:
-                time.sleep(0.01)
+    for i in range(1,loops):
+        # Sleep time
+        sleep_max = 1.0
+        sleep = sleep_max - (time.time() - prev_time)
+        if sleep>=0.01:
+            time.sleep(sleep)
+        else:
+            time.sleep(0.01)
 
-            # Record time and change in time
-            tm = time.time() - start_time
-            dt = time.time() - prev_time
-            prev_time = time.time()
-                        
-            # Read temperatures in Kelvin 
-            T1[i] = a.readTemp()
-            T2[i] = a.readTemp2() 
+        # Record time and change in time
+        t = time.time()
+        dt = t - prev_time
+        prev_time = t
+        tm[i] = t - start_time
+                    
+        # Read temperatures in Kelvin 
+        T1[i] = a.T1
+        T2[i] = a.T2
 
-            ###############################
-            ### CONTROLLER or ESTIMATOR ###
-            ###############################
+        ###############################
+        ### CONTROLLER or ESTIMATOR ###
+        ###############################
 
-            # Write output in milliVolts (0-250)
-            mV1[i] = min(250.0,max(0.0,mV1[i]))
-            a.writeVoltage(int(mV1[i]))
+        # Write output (0-100)
+        a.Q1(Q1[i])
+        a.Q2(Q2[i])
 
-            mV2[i] = min(250.0,max(0.0,mV2[i]))
-            a.writeVoltage2(int(mV2[i]))
+        # Print line of data
+        print('{:6.1f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}'.format(tm[i], \
+                                                               Q1[i], \
+                                                               Q2[i], \
+                                                               T1[i], \
+                                                               T2[i]))
 
-            # Add data to array
-            newData = np.array([[tm,mV1[i],T1[i],Tsp1[i],mV2[i],T2[i],Tsp2[i]]])
-            print('{:10.2f} {:10.2f} {:10.2f} {:10.2f} {:10.2f}'.format(tm,mV1[i],T1[i],mV2[i],T2[i]))
-            a.addData(newData)
-            
-            # Update plots
-            a.updatePlots()
-
-    # Write data to file
-    a.saveData()
-    
+        # Plot
+        plt.clf()
+        ax=plt.subplot(2,1,1)
+        ax.grid()
+        plt.plot(tm[0:i],T1[0:i],'ro',MarkerSize=3,label=r'$T_1$')
+        plt.plot(tm[0:i],T2[0:i],'bx',MarkerSize=3,label=r'$T_2$')
+        plt.ylabel('Temperature (degC)')
+        plt.legend(loc='best')
+        ax=plt.subplot(2,1,2)
+        ax.grid()
+        plt.plot(tm[0:i],Q1[0:i],'r-',LineWidth=3,label=r'$Q_1$')
+        plt.plot(tm[0:i],Q2[0:i],'b:',LineWidth=3,label=r'$Q_2$')
+        plt.ylabel('Heaters')
+        plt.xlabel('Time (sec)')
+        plt.legend(loc='best')
+        plt.draw()
+        plt.pause(0.05)
+        
 # Allow user to end loop with Ctrl-C           
 except KeyboardInterrupt:
-    # Write data to file
-    a.saveData()
     # Disconnect from Arduino
-    a.writeVoltage(0)
-    a.writeVoltage2(0)
+    a.Q1(0)
+    a.Q2(0)
     print('Shutting down')
     a.close()
     
 # Make sure serial connection still closes when there's an error
 except:           
     # Disconnect from Arduino
-    a.writeVoltage(0)
-    a.writeVoltage2(0)
+    a.Q1(0)
+    a.Q2(0)
     print('Error: Shutting down')
     a.close()
     raise
