@@ -1,0 +1,18 @@
+  Constants
+    T_ss = 20
+    Q_ss = 0
+  End Constants
+
+  Parameters 
+    tau = 180
+    Kp = 0.64
+    Q = Q_ss
+  End Parameters 
+
+  Variables
+    T = T_ss
+  End Variables
+    
+  Equations 
+    tau * $T = - (T-T_ss) + Kp * (Q-Q_ss)
+  End Equations  
