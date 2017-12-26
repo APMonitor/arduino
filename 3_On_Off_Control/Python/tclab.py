@@ -1,6 +1,12 @@
 import sys
 import time
-import serial
+import numpy as np
+try:
+    import serial
+except:
+    import pip
+    pip.main(['install','pyserial'])
+    import serial
 from serial.tools import list_ports
         
 class TCLab(object):
@@ -24,10 +30,14 @@ class TCLab(object):
             if port[2].startswith('USB VID:PID=16D0:0613'):
                 port = port[0]
                 found = True
-            # HDuino
+            # Arduino HDuino
             if port[2].startswith('USB VID:PID=1A86:7523'):
                 port = port[0]
                 found = True                
+            # Arduino Leonardo
+            if port[2].startswith('USB VID:PID=2341:8036'):
+                port = port[0]
+                found = True
         if (not found):
             print('Arduino COM port not found')
             print('Please ensure that the USB cable is connected')
@@ -46,7 +56,8 @@ class TCLab(object):
             print('')
             port = input('Input port: ')
             # or hard-code it here
-            #port = 'COM3'
+            #port = 'COM3' # for Windows
+            #port = '/dev/tty.wchusbserial1410' # for MacOS
         return port
     
     def stop(self):
@@ -79,7 +90,20 @@ class TCLab(object):
         pwm = max(0.0,min(100.0,pwm)) 
         self.write('Q2',pwm)
         return pwm
-            
+
+    # save txt file with data and set point
+    # t = time
+    # u1,u2 = heaters
+    # y1,y2 = tempeatures
+    # sp1,sp2 = setpoints
+    def save_txt(self,t,u1,u2,y1,y2,sp1,sp2):
+        data = np.vstack((t,u1,u2,y1,y2,sp1,sp2))  # vertical stack
+        data = data.T                 # transpose data
+        top = 'Time (sec), Heater 1 (%), Heater 2 (%), ' \
+          + 'Temperature 1 (degC), Temperature 2 (degC), ' \
+          + 'Set Point 1 (degC), Set Point 2 (degC)' 
+        np.savetxt('data.txt',data,delimiter=',',header=top,comments='')
+
     def read(self,cmd):
         cmd_str = self.build_cmd_str(cmd,'')
         try:
