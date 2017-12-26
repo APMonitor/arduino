@@ -30,10 +30,14 @@ class TCLab(object):
             if port[2].startswith('USB VID:PID=16D0:0613'):
                 port = port[0]
                 found = True
-            # HDuino
+            # Arduino HDuino
             if port[2].startswith('USB VID:PID=1A86:7523'):
                 port = port[0]
                 found = True                
+            # Arduino Leonardo
+            if port[2].startswith('USB VID:PID=2341:8036'):
+                port = port[0]
+                found = True
         if (not found):
             print('Arduino COM port not found')
             print('Please ensure that the USB cable is connected')
