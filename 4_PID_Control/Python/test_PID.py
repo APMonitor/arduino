@@ -1,4 +1,5 @@
 import tclab
+from save_txt import save_txt
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -229,7 +230,7 @@ try:
     a.Q1(0)
     a.Q2(0)
     # Save text file
-    a.save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
+    save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
     # Save figure
     plt.savefig('test_PID.png')
         
@@ -240,7 +241,7 @@ except KeyboardInterrupt:
     a.Q2(0)
     print('Shutting down')
     a.close()
-    a.save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
+    save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
     plt.savefig('test_PID.png')
     
 # Make sure serial connection still closes when there's an error
@@ -250,6 +251,6 @@ except:
     a.Q2(0)
     print('Error: Shutting down')
     a.close()
-    a.save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
+    save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
     plt.savefig('test_PID.png')
     raise
