@@ -1,0 +1,17 @@
+Model                
+  Parameters         
+   tau = 60        
+   K = 0.1
+   t0 = 73.09766
+   v0 = 0
+   voltage
+  End Parameters     
+
+  Variables          
+   temperature              
+  End Variables      
+  
+  Equations          
+   tau * $temperature + (temperature - t0) = K * (voltage-v0)  
+  End Equations      
+End Model            

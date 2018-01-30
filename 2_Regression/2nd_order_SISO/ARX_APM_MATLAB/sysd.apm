@@ -1,0 +1,57 @@
+
+Objects 
+  sysd = lti
+End Objects 
+
+Connections
+  u[1:1] = sysd.u[1:1]
+  x[1:2] = sysd.x[1:2]
+  y[1:1] = sysd.y[1:1]
+End Connections
+
+Model 
+  Parameters 
+    u[1:1] = 0
+  End Parameters 
+
+  Variables 
+    x[1:2] = 0
+    y[1:1] = 0
+  End Variables 
+
+  Equations 
+    ! add any additional equations here 
+  End Equations 
+End Model 
+
+! dimensions
+! (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
+! (px1) = (pxn)*(nx1) + (pxm)*(mx1)
+!
+! discrete form with sampling time = 1.010000
+! x[k+1] = A * x[k] + B * u[k]
+!   y[k] = C * x[k] + D * u[k]
+File sysd.txt
+  sparse, discrete  ! dense/sparse, continuous/discrete
+  1      ! m=number of inputs
+  2      ! n=number of states
+  1      ! p=number of outputs
+End File
+
+File sysd.a.txt 
+   1 1 1.000000
+   2 1 0.062500
+   1 2 -0.098384
+End File 
+
+File sysd.b.txt 
+   1 1 0.062500
+End File 
+
+File sysd.c.txt 
+   1 1 0.036480
+End File 
+
+File sysd.d.txt 
+   1 1 0.000000
+End File 

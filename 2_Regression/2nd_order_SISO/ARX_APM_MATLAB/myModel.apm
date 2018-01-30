@@ -1,0 +1,38 @@
+Objects
+  sum_a[1:no] = sum(2)
+  sum_b[1:ni][1::no] = sum(1)
+End Objects
+  
+Connections
+  a[1:ny][1::no] = sum_a[1::no].x[1:ny]
+  b[1:nu][1::ni][1:::no] = sum_b[1::ni][1:::no].x[1:nu]
+  sum_a[1:no] = sum_a[1:no].y
+  sum_b[1:ni][1::no] = sum_b[1:ni][1::no].y
+End Connections
+  
+Constants
+  n = 571
+  ni = 1
+  no = 1
+  ny = 2
+  nu = 1
+  m = 2
+  
+Parameters
+  a[1:ny][1::no] = 0 >= -1 <= 1
+  b[1:nu][1::ni][1:::no] = 0
+  c[1:no] = 0
+  u[1:n][1::ni]
+  y[1:m][1::no]
+  z[1:n][1::no]
+  
+Variables
+  y[m+1:n][1::no] = 0
+  sum_a[1:no] = 0 , <= 1
+  sum_b[1:ni][1::no] = 0
+  K[1:ni][1::no] = 0 >= 0 <= 10
+  
+Equations
+  y[m+1:n][1::no] = a[1][1::no]*y[m:n-1][1::no] + b[1][1][1::no]*u[m:n-1][1] + a[2][1::no]*y[m-1:n-2][1::no]
+  K[1:ni][1::no] * (1 - sum_a[1::no]) = sum_b[1:ni][1::no]
+  minimize   1.00000000 * (y[m+1:n][1::no] - z[m+1:n][1::no])^2

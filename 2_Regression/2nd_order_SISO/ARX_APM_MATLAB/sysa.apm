@@ -1,0 +1,46 @@
+
+Objects 
+  sysa = arx
+End Objects 
+
+Connections
+  u[1:1] = sysa.u[1:1]
+  y[1:1] = sysa.y[1:1]
+End Connections
+
+Model 
+  Parameters 
+    u = 0
+  End Parameters 
+
+  Variables 
+    y = 0
+  End Variables 
+
+  Equations 
+    ! add any additional equations here 
+  End Equations 
+End Model 
+
+File sysa.txt
+  1      ! m=number of inputs
+  1      ! p=number of outputs
+  1      ! nu=number of input terms
+  2      ! ny=number of output terms
+End File
+
+! Alpha matrix (ny x p)
+File sysa.alpha.txt 
+  1 
+  -6.149000e-03 
+End File 
+
+! Beta matrix (p x (nu x m))
+File sysa.beta.txt 
+  2.280000e-03 
+End File 
+
+! Gamma vector (p x 1)
+File sysa.gamma.txt 
+0 
+End File 
