@@ -107,7 +107,7 @@ for ii = 1:loops
     addpoints(antau,time(ii),tau(ii))
     drawnow    
     
-    if ii==10:
+    if ii==10
         apm_web(s,b);
     end
 end
