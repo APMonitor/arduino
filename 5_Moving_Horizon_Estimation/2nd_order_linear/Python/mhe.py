@@ -92,7 +92,7 @@ def mhe_init():
     apm_option(s,b,'TC.fstatus',1)
 
     # web-viewer option, update every second
-    apm_option(s,b,'nlc.web_plot_freq',1)
+    apm_option(s,b,'nlc.web_plot_freq',2)
 
     msg = 'initialization complete'
 
