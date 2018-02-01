@@ -8,18 +8,23 @@ time = 10;           % time in min
 loops = time*60;        % simulation time in seconds
 
 % Measurements and Predictions
-T1 = ones(loops) * T1C();       % measured T (sensor 1)
-T2 = ones(loops) * T2C();       % measured T (sensor 2)
-Tp1 = ones(loops) * T1C();      % pred T1 (energy balance model)
-Tp2 = ones(loops) * T2C();      % pred T2 (energy balance model)
+time = zeros(1,loops);
+T1 = ones(1,loops) * T1C();       % measured T (sensor 1)
+T2 = ones(1,loops) * T2C();       % measured T (sensor 2)
+Tp1 = ones(1,loops) * T1C();      % pred T1 (energy balance model)
+Tp2 = ones(1,loops) * T2C();      % pred T2 (energy balance model)
 
 % Error & Power allocation
-error1 = zeros(loops);         % error vector for T1 model
-error2 = zeros(loops);         % error vector for T2 model
+error1 = zeros(loops,1);         % error vector for T1 model
+error2 = zeros(loops,1);         % error vector for T2 model
 Q = zeros(loops,2);
 % adjust heater levels
-Q(10:end,1) = 90;   % heater 1
-Q(300:end,2) = 80;  % heater 2
+Q(10:end,1) = 100.0;
+Q(100:end,2) = 50.0;
+Q(200:end,1) = 5.0;
+Q(300:end,2) = 80.0;
+Q(400:end,1) = 70.0;
+Q(500:end,2) = 10.0;
 
 start_time = clock;
 prev_time = start_time;
@@ -71,6 +76,9 @@ for ii = 1:loops
     % Record time and change in time
     t = clock;
     dt = etime(t,prev_time);
+    if ii>=2
+        time(ii) = time(ii-1) + dt;
+    end
     prev_time = t;
     
     % non-linear energy balance
@@ -91,16 +99,17 @@ for ii = 1:loops
     error(jj) = error1(jj) + error2(jj);
     
     % plot
-    addpoints(anexp1,ii,T1(ii))
-    addpoints(anexp2,ii,T2(ii))
-    addpoints(anpred1,ii,Tp1(ii))
-    addpoints(anpred2,ii,Tp2(ii))
-    addpoints(anerror,ii,error(ii))
-    addpoints(anQ1,ii,Q1s(ii))
-    addpoints(anQ2,ii,Q2s(ii))
+    addpoints(anexp1,time(ii),T1(ii))
+    addpoints(anexp2,time(ii),T2(ii))
+    addpoints(anpred1,time(ii),Tp1(ii))
+    addpoints(anpred2,time(ii),Tp2(ii))
+    addpoints(anerror,time(ii),error(ii))
+    addpoints(anQ1,time(ii),Q1s(ii))
+    addpoints(anQ2,time(ii),Q2s(ii))
     drawnow
     
 end
+
 disp(['Energy Balance Cumulative Error =', num2str(error(end,1))]);
 h1(0);
 h2(0);
@@ -113,3 +122,8 @@ if (T1C() || T2C()) > 50
 else
     led(0)
 end
+
+% save txt file with data
+data = [time',Q1s',Q2s',T1',T2'];
+csvwrite('data.txt',data);
+%save 'data.txt' -ascii data
