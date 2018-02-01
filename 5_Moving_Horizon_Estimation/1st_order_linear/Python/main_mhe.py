@@ -37,7 +37,7 @@ tm = np.zeros(loops)
 # moving horizon estimation
 from mhe import *
 s = 'http://byu.apmonitor.com'
-s = 'http://127.0.0.1'
+#s = 'http://127.0.0.1'
 b = 'mhe'
 mhe_init()
 
