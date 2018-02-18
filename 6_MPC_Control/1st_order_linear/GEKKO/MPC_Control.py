@@ -70,7 +70,7 @@ TC1.TAU = 10       # time constant for response
 m.Equation(tau * TC1.dt() + (TC1-TC1_ss) == Kp * (Q1-Q1_ss))  
 
 # Global Options
-m.server = 'http://127.0.0.1' # local server, if available
+#m.server = 'http://127.0.0.1' # local server, if available
 m.options.IMODE   = 6 # MPC
 m.options.CV_TYPE = 1 # Objective type
 m.options.NODES   = 3 # Collocation nodes
