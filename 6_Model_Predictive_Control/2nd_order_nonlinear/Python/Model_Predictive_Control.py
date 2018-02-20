@@ -105,6 +105,11 @@ try:
         # Open Web-Plot
         if i==20:
             apm_web(s,c)
+    
+    # turn off heaters    
+    a.Q1(0)
+    a.Q2(0)
+    print('Shutting down')
         
 # Allow user to end loop with Ctrl-C           
 except KeyboardInterrupt:
