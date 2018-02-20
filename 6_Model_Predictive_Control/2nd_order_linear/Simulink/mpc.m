@@ -6,9 +6,9 @@ if isempty(first)
     % initialization
     s = 'http://byu.apmonitor.com';
     c = 'mpc';
+    addpath('apm')
     msg = mpc_init(s,c);
     disp(msg)
-    addpath('apm')
 end
 
 T_sp = inputs(1);
