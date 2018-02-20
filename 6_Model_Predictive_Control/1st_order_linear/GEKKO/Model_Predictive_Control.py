@@ -144,6 +144,11 @@ try:
         plt.legend(loc='best')
         plt.draw()
         plt.pause(0.05)
+
+    # Turn off heaters
+    a.Q1(0)
+    a.Q2(0)
+    print('Shutting down')
         
 # Allow user to end loop with Ctrl-C           
 except KeyboardInterrupt:
