@@ -24,7 +24,7 @@ if (apm_tag(s,c,'apm.appstatus')==1)
     Q2 = apm_tag(s,c,'Q2.Newval');
 else
     % display output for debugging
-    print(output)
+    disp(output)
     % not successful, set voltage to zero
     Q1 = 0;
     Q2 = 0;
