@@ -1,0 +1,28 @@
+Constants
+  Ta = 23     ! degC
+
+Parameters
+  K1 = 0.607  > 0.1    < 1.0
+  K2 = 0.293  > 0.1    < 1.0
+  K3 = 0.24   > 0.0001 < 1.0
+  tau12 = 192 > 50.0   < 250.0 ! sec
+  tau3 = 15   > 10.0   < 20.0  ! sec
+  
+Parameters
+  Q1 = 0
+  Q2 = 0
+  
+Variables
+  TH1 = Ta
+  TH2 = Ta
+  TC1 = Ta
+  TC2 = Ta
+  
+Intermediates
+  DT = TH2 - TH1
+
+Equations
+  tau12 * $TH1 + (TH1-Ta) = K1*Q1 + K3*DT
+  tau12 * $TH2 + (TH2-Ta) = K2*Q2 - K3*DT	
+  tau3 * $TC1 = -TC1 + TH1
+  tau3 * $TC2 = -TC2 + TH2			 
