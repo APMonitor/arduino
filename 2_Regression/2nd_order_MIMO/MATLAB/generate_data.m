@@ -4,7 +4,7 @@ clear all; close all; clc
 tclab;
 
 % Run time in minutes
-run_time = 10.0;
+run_time = 0.3;
 
 % Number of cycles (1 cycle per 3 seconds)
 loops = round(20*run_time);
@@ -12,30 +12,27 @@ loops = round(20*run_time);
 % milli-volts input
 Q1 = zeros(1,loops);
 Q2 = zeros(1,loops);
-Q1(3:end) = 100.0;
-Q1(50:end) = 0.0;
-Q1(100:end) = 80.0;
-
-Q2(25:end) = 60.0;
-Q2(75:end) = 100.0;
-Q2(125:end) = 25.0;
-
-for i = 130:180
-    if mod(i,10)==0
-        Q1(i:i+10) = rand(1) * 100;
-    end
-    if mod(i+5,10)==0
-        Q2(i:i+10) = rand(1) * 100;
-    end        
-end
+% Q1(3:end) = 100.0;
+% Q1(50:end) = 0.0;
+% Q1(100:end) = 80.0;
+% 
+% Q2(25:end) = 60.0;
+% Q2(75:end) = 100.0;
+% Q2(125:end) = 25.0;
+% 
+% for i = 130:180
+%     if mod(i,10)==0
+%         Q1(i:i+10) = rand(1) * 100;
+%     end
+%     if mod(i+5,10)==0
+%         Q2(i:i+10) = rand(1) * 100;
+%     end        
+% end
 
 % Temperature (degC)
 T1 = ones(1,loops) * T1C(); % measured T
 T2 = ones(1,loops) * T2C(); % measured T
 time = zeros(1,loops);
-
-% time
-tm = zeros(1,loops);
 
 start_time = clock;
 prev_time = start_time;
@@ -111,10 +108,10 @@ csvwrite('data.txt',data);
 % save as csv file with headers
 fid = fopen('data.csv','w');
 fid2 = fopen('data.txt','r');
-fwrite(fid,'time,Q1,Q2,TC1,TC2\n');
+fprintf(fid,'%s\n',['time,Q1,Q2,TC1,TC2']);
 while ~feof(fid2)
     line = fgetl(fid2);
-    fwrite(fid,line);
+    fprintf(fid,'%s\n',line);
 end
 fclose(fid);
 fclose(fid2);
