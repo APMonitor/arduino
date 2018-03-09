@@ -4,30 +4,30 @@ clear all; close all; clc
 tclab;
 
 % Run time in minutes
-run_time = 0.3;
+run_time = 10;
 
 % Number of cycles (1 cycle per 3 seconds)
 loops = round(20*run_time);
 
-% milli-volts input
+% heater input
 Q1 = zeros(1,loops);
 Q2 = zeros(1,loops);
-% Q1(3:end) = 100.0;
-% Q1(50:end) = 0.0;
-% Q1(100:end) = 80.0;
-% 
-% Q2(25:end) = 60.0;
-% Q2(75:end) = 100.0;
-% Q2(125:end) = 25.0;
-% 
-% for i = 130:180
-%     if mod(i,10)==0
-%         Q1(i:i+10) = rand(1) * 100;
-%     end
-%     if mod(i+5,10)==0
-%         Q2(i:i+10) = rand(1) * 100;
-%     end        
-% end
+Q1(3:end) = 100.0;
+Q1(50:end) = 0.0;
+Q1(100:end) = 80.0;
+
+Q2(25:end) = 60.0;
+Q2(75:end) = 100.0;
+Q2(125:end) = 25.0;
+
+for i = 130:180
+    if mod(i,10)==0
+        Q1(i:i+10) = rand(1) * 100;
+    end
+    if mod(i+5,10)==0
+        Q2(i:i+10) = rand(1) * 100;
+    end        
+end
 
 % Temperature (degC)
 T1 = ones(1,loops) * T1C(); % measured T
@@ -46,7 +46,6 @@ anexp2 = animatedline('LineStyle','-', 'Color', 'b', 'LineWidth', 2);
 ylabel('Temperature \circC')
 legend('T_1 Measured', 'T_2 Measured', ...
     'Location', 'northwest')
-title('Temperature Estimation')
 subplot(2,1,2)
 hold on, grid on
 anQ1 = animatedline('LineStyle','-', 'Color', 'k', 'LineWidth', 2);
