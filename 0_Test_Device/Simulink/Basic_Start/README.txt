@@ -1,0 +1,7 @@
+This lab is an application of feedback control for a temperature control device. There are two heaters and two temperature sensors. The heater power output is adjusted to maintain a desired temperature setpoint. Thermal energy from the heater is transferred by conduction, convection, and radiation to the temperature sensor. Heat is also transferred away from the device to the surroundings. This lab is a resource for model identification and controller development. It is a pocket-sized lab with the purpose of reinforcing programming, simulation, and control theory for students.
+
+To run the Simulink interface, open arduino_lab.slx. This Simulink model requires the Arduino support package for MATLAB (not the Simulink Arduino) that is available as an Add-on from https://www.mathworks.com/hardware-support/arduino-matlab.html  There are more setup instructions posted to the address printed on the Arduino device: https://apmonitor.com/heat.htm  A GitHub repository also contains sample source code: https://github.com/APMonitor/arduino
+
+Once the Arduino Support for MATLAB add-on is installed, open arduino_lab.slx. If there is an error on the real-time pacer block, check that the run directory for MATLAB has realtime_pacer_lib.mdl and the other supporting m files.
+
+Please contact support at support@apmonitor.com for any questions related to the lab.
