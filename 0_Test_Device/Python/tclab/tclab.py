@@ -12,10 +12,7 @@ from serial.tools import list_ports
 class TCLab(object):
 
     def __init__(self, port=None, baud=9600):
-        if (sys.platform == 'darwin') and not port:
-            port = '/dev/tty.wchusbserial1410'
-        else:
-            port = self.findPort()
+        port = self.findPort()
         print('Opening connection')
         self.sp = serial.Serial(port=port, baudrate=baud, timeout=2)
         self.sp.flushInput()
