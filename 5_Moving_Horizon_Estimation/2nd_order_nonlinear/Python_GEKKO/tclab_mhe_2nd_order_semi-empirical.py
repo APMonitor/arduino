@@ -52,8 +52,9 @@ amhe2 = 0.0075 * np.ones(n)
 #########################################################
 # Initialize Model as Estimator
 #########################################################
-m = GEKKO(name='tclab-mhe')
-#m.server = 'http://127.0.0.1' # if local server is installed
+# Use remote=False for local solve (Windows, Linux, ARM)
+#     remote=True  for remote solve (All platforms)
+m = GEKKO(name='tclab-mhe',remote=False)
 
 # 60 second time horizon, 20 steps
 m.time = np.linspace(0,60,21)
@@ -66,12 +67,12 @@ U.DMAX = 1
 U.LOWER = 5
 U.UPPER = 15
 
-tau = m.FV(value=5,name='tau')
+tau = m.FV(value=20,name='tau')
 tau.STATUS = 0  # don't estimate initially
 tau.FSTATUS = 0 # no measurements
 tau.DMAX = 1
-tau.LOWER = 4
-tau.UPPER = 8
+tau.LOWER = 15
+tau.UPPER = 25
 
 alpha1 = m.FV(value=0.01,name='a1')   # W / % heater
 alpha1.STATUS = 0  # don't estimate initially
@@ -197,8 +198,7 @@ try:
             alpha2.STATUS = 1
         
         # Predict Parameters and Temperatures with MHE
-        # use remote=False for local solve
-        m.solve(remote=True) 
+        m.solve() 
 
         if m.options.APPSTATUS == 1:
             # Retrieve new values
