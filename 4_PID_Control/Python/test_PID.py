@@ -1,5 +1,4 @@
 import tclab
-from save_txt import save_txt
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -56,6 +55,19 @@ def pid(sp,pv,pv_last,ierr,dt):
         op = max(oplo,min(ophi,op))
     # return the controller output and PID terms
     return [op,P,I,D]
+
+# save txt file with data and set point
+# t = time
+# u1,u2 = heaters
+# y1,y2 = tempeatures
+# sp1,sp2 = setpoints
+def save_txt(t, u1, u2, y1, y2, sp1, sp2):
+    data = np.vstack((t, u1, u2, y1, y2, sp1, sp2))  # vertical stack
+    data = data.T  # transpose data
+    top = ('Time (sec), Heater 1 (%), Heater 2 (%), ' 
+           'Temperature 1 (degC), Temperature 2 (degC), '
+           'Set Point 1 (degC), Set Point 2 (degC)')
+    np.savetxt('data.txt', data, delimiter=',', header=top, comments='')
     
 ######################################################
 # FOPDT model                                        #
@@ -144,21 +156,27 @@ plt.show()
 # Main Loop
 start_time = time.time()
 prev_time = start_time
+dt_error = 0.0
 # Integral error
 ierr = 0.0
 try:
     for i in range(1,loops):
         # Sleep time
         sleep_max = 1.0
-        sleep = sleep_max - (time.time() - prev_time)
-        if sleep>=0.01:
-            time.sleep(sleep-0.01)
+        sleep = sleep_max - (time.time() - prev_time) - dt_error
+        if sleep>=1e-4:
+            time.sleep(sleep-1e-4)
         else:
-            time.sleep(0.01)
+            print('exceeded max cycle time by ' + str(abs(sleep)) + ' sec')
+            time.sleep(1e-4)
 
         # Record time and change in time
         t = time.time()
         dt = t - prev_time
+        if (sleep>=1e-4):
+            dt_error = dt-1.0+0.009
+        else:
+            dt_error = 0.0
         prev_time = t
         tm[i] = t - start_time
                     
@@ -254,3 +272,4 @@ except:
     save_txt(tm[0:i],Q1[0:i],Q2[0:i],T1[0:i],T2[0:i],Tsp1[0:i],Tsp2[0:i])
     plt.savefig('test_PID.png')
     raise
+    
