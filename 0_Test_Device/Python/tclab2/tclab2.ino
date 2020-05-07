@@ -1,7 +1,7 @@
 /*
   TCLab Temperature Control Lab Firmware
-  Jeffrey Kantor
-  February, 2019
+  Jeffrey Kantor, Bill Tubbs, John Hedengren
+  May 2019
 
   This firmware provides a high level interface to the Temperature Control Lab. The
   firmware scans the serial port for commands. Commands are case-insensitive. Any
@@ -58,6 +58,7 @@
       1.4.2 fix bug with X command
       1.4.3 required Arduino IDE Version >= 1.0.0
       1.5.0 remove webusb
+      1.6.0 average 10 temperature measurements to reduce noise
 */
 
 #include "Arduino.h"
@@ -141,7 +142,11 @@ void echoCommand() {
 
 // return thermister temperature in °C
 inline float readTemperature(int pin) {
-  return analogRead(pin) * 0.3223 - 50.0;
+  float read_sum = 0.;
+  for(i=0;i<10;i++) {
+    read_sum += analogRead(pin) * 0.3223 - 50.0
+  }
+  return read_sum / 10;
 }
 
 void parseCommand(void) {
