@@ -82,7 +82,7 @@ for ii = 1:loops
     T2(ii) = T2C();
     
     % model predictive control
-    [Q1(ii), Q2(ii)] = mpc(T1(ii),Tsp1(ii),T2(ii),Tsp2(ii));
+    [Q1(ii), Q2(ii)] = mpc2(T1(ii),Tsp1(ii),T2(ii),Tsp2(ii));
     
     % adjust power level
     h1(Q1(ii));
