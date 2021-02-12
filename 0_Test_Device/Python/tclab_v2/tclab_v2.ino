@@ -86,7 +86,7 @@
 const bool DEBUG = false;
 
 // constants
-const String vers = "3.0.0";   // version of this firmware
+const String vers = "2.0.0";   // version of this firmware
 const long baud = 115200;      // serial baud rate
 const char sp = ' ';           // command separator
 const char nl = '\n';          // command terminator
